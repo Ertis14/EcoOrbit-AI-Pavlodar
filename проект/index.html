@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>EcoOrbit AI - Мониторинг Павлодара</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
+        #sidebar { width: 300px; background: #2c3e50; color: white; padding: 20px; z-index: 1000; overflow-y: auto; }
+        #map { flex-grow: 1; }
+        .stat-card { background: #34495e; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 5px solid #e74c3c; }
+        .danger { color: #e74c3c; font-weight: bold; }
+        button { background: #27ae60; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        button:hover { background: #2ecc71; }
+        input[type="file"] { margin-bottom: 15px; color: #ecf0f1; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>EcoOrbit AI 🛰️</h2>
+        <p>Система космического мониторинга лесов Павлодарской области</p>
+        
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Запустить анализ ИИ</button>
+        </form>
+
+        {% if area %}
+        <div class="stat-card">
+            <h3>Результаты анализа:</h3>
+            <p>Статус: <span class="danger">Обнаружен пожар!</span></p>
+            <p>Место: <strong>г. Павлодар</strong></p>
+            <p>Площадь: <strong>{{ area }} Га</strong></p>
+            <p>Ущерб (прогноз): <br>
+               <span class="danger" style="font-size: 1.2em;">{{ money }} KZT</span>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+    // 1. Инициализация карты сразу на Павлодар
+    var map = L.map('map').setView([52.2873, 76.9671], 10); 
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 2. Получаем статус пожара из Flask (важно: БЕЗ пропусков кода!)
+    var fireStatus = "{{ 'true' if area else 'false' }}";
+
+    if (fireStatus === "true") {
+        var lat = 52.2873; 
+        var lon = 76.9671; 
+        
+        var marker = L.marker([lat, lon]).addTo(map)
+            .bindPopup('<b>Внимание!</b><br>Очаг возгорания обнаружен в Павлодаре.')
+            .openPopup();
+
+        map.setView([lat, lon], 14);
+    }
+    </script>
+
+</body>
+</html>
